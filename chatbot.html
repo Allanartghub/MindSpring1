@@ -1,0 +1,276 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>MindSpring Chatbot</title>
+    <style>
+        /* General Styles */
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #ffff;
+            color: #004d40;
+            margin: 0;
+            padding: 0;
+            display: flex;
+            flex-direction: column;
+            height: 100vh;
+        }
+        .container {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            padding: 20px;
+        }
+        .chatbox {
+            width: 100%;
+            max-width: 600px;
+            background: #ffffff;
+            border-radius: 10px;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+            overflow: hidden;
+            display: flex;
+            flex-direction: column;
+        }
+        .messages {
+            flex: 1;
+            padding: 20px;
+            overflow-y: auto;
+        }
+        .message {
+            margin-bottom: 10px;
+            padding: 10px;
+            border-radius: 10px;
+            max-width: 80%;
+        }
+        .message.user {
+            background-color: #b2dfdb;
+            align-self: flex-end;
+        }
+        .message.bot {
+            background-color: #80cbc4;
+            align-self: flex-start;
+        }
+        .input-box {
+            display: flex;
+            border-top: 1px solid #ddd;
+        }
+        .input-box input {
+            flex: 1;
+            padding: 10px;
+            border: none;
+            outline: none;
+        }
+        .input-box button {
+            padding: 10px;
+            background-color: #004d40;
+            color: #ffffff;
+            border: none;
+            cursor: pointer;
+        }
+        .input-box button:disabled {
+            background-color: #80cbc4;
+        }
+        /* Bottom Navigation */
+        .nav {
+            display: flex;
+            justify-content: space-around;
+            background-color: #004d40;
+            padding: 10px 0;
+        }
+        .nav a {
+            color: #ffffff;
+            text-decoration: none;
+            text-align: center;
+            flex: 1;
+        }
+        .nav a:hover {
+            background-color: #00796b;
+        }
+        .nav a.active {
+            background-color: #00796b;
+        }
+        /* Responsive Design */
+        @media (max-width: 600px) {
+            .chatbox {
+                width: 100%;
+            }
+        }
+        .header {
+            text-align: center;
+            margin-bottom: 20px;
+        }
+        .header img {
+            width: 300px;
+            height: auto;
+            margin-bottom: 0px;
+        }
+        .header h1 {
+            margin: 10px 0;
+            color: #004d40;
+        }
+        .header p {
+            color: #00796b;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        .header p .icon {
+            margin-left: 10px;
+            font-size: 24px;
+        }
+        .therapist-section {
+            text-align: center;
+            margin-top: 20px;
+        }
+        .therapist-section a {
+            display: inline-block;
+            padding: 10px 20px;
+            background-color: #004d40;
+            color: #ffffff;
+            text-decoration: none;
+            border-radius: 5px;
+            margin-top: 10px;
+        }
+        .therapist-section a:hover {
+            background-color: #00796b;
+        }
+    </style>
+    <script>
+        const API_KEY = 'sk-1234567890abcdef1234567890abcdef12345678';
+    </script>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <img src="logo.png" alt="Logo">
+            <h1>Welcome to Serene</h1>
+            <p>Your companion for mental wellness
+                <span class="icon">🍃</span>
+            </p>
+        </div>        
+        <!-- Embed Chatbase iframe -->
+        <iframe
+            src="https://www.chatbase.co/chatbot-iframe/4wrsyl_SmTgW_vshTISQP"
+            width="100%"
+            style="height: 80%; min-height: 500px"
+            frameborder="0"
+        ></iframe>
+    </div>
+    <div class="therapist-section">
+        <p>Need more help? Reach out to a therapist:</p>
+        <a href="#">Contact a Therapist</a>
+    </div>
+    <div class="nav">
+        <a href="#">Wellness Exercises 🏃‍♂️</a>
+        <a href="#" class="active">Chatbot 🤖</a>
+        <a href="#">Journal Section 📓</a>
+        <a href="#">Community Corner 👥</a>
+        
+    </div>
+    <script>
+        // JavaScript for chatbot interaction
+        const messagesContainer = document.getElementById('messages');
+        const userInput = document.getElementById('userInput');
+        const sendButton = document.getElementById('sendButton');
+
+        async function sendMessage() {
+            const messageText = userInput.value.trim();
+            if (messageText === '') return;
+
+            // Display user message
+            const userMessage = document.createElement('div');
+            userMessage.className = 'message user';
+            userMessage.textContent = messageText;
+            messagesContainer.appendChild(userMessage);
+
+            // Clear input
+            userInput.value = '';
+            userInput.focus();
+
+            // Make API call to get bot response
+            const botMessage = document.createElement('div');
+            botMessage.className = 'message bot';
+            try {
+                console.log('Sending message to server:', messageText);
+                const response = await fetch('http://localhost:5000/chatbot', { // Update with your server URL
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Authorization': `Bearer ${API_KEY}`
+                    },
+                    body: JSON.stringify({ message: messageText })
+                });
+                const data = await response.json();
+                console.log('Received response from server:', data);
+                if (response.ok) {
+                    botMessage.textContent = data.reply;
+                } else {
+                    console.error('Server responded with an error:', data);
+                    botMessage.textContent = 'Sorry, I am having trouble responding right now.';
+                }
+            } catch (error) {
+                console.error('Error communicating with server:', error);
+                botMessage.textContent = 'Sorry, I am having trouble responding right now.';
+            }
+            messagesContainer.appendChild(botMessage);
+            messagesContainer.scrollTop = messagesContainer.scrollHeight;
+        }
+
+        function handleKeyPress(event) {
+            if (event.key === 'Enter') {
+                sendMessage();
+            }
+        }
+
+        // Enable send button only when input is not empty
+        userInput.addEventListener('input', () => {
+            sendButton.disabled = userInput.value.trim() === '';
+        });
+
+        // Smooth transition for navigation
+        document.querySelectorAll('.nav a').forEach(link => {
+            link.addEventListener('click', (e) => {
+                e.preventDefault();
+                document.querySelector('.nav a.active').classList.remove('active');
+                link.classList.add('active');
+                alert('This is a placeholder for ' + link.textContent);
+            });
+        });
+    </script>
+    <script>
+        (function(){
+            if(!window.chatbase || window.chatbase("getState") !== "initialized"){
+                window.chatbase = (...arguments) => {
+                    if(!window.chatbase.q){
+                        window.chatbase.q = [];
+                    }
+                    window.chatbase.q.push(arguments);
+                };
+                window.chatbase = new Proxy(window.chatbase, {
+                    get(target, prop){
+                        if(prop === "q"){
+                            return target.q;
+                        }
+                        return (...args) => target(prop, ...args);
+                    }
+                });
+            }
+            const onLoad = function(){
+                const script = document.createElement("script");
+                script.src = "https://www.chatbase.co/embed.min.js";
+                script.id = "4wrsyl_SmTgW_vshTISQP";
+                script.domain = "www.chatbase.co";
+                document.body.appendChild(script);
+            };
+            if(document.readyState === "complete"){
+                onLoad();
+            } else {
+                window.addEventListener("load", onLoad);
+            }
+        })();
+    </script>
+</body>
+</html>
